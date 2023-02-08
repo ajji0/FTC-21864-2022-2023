@@ -38,6 +38,8 @@ public class XDrive extends LinearOpMode {
         telemetry.addData("Arm_Starting_at...:", "%7d", robot.armMotor.getCurrentPosition());
         telemetry.update();
 
+        robot.StartUp();
+
         while (opModeIsActive()){
 
             // Gets the the imput of the gamepad and adjest the Motors power
@@ -85,33 +87,25 @@ public class XDrive extends LinearOpMode {
                 if (gamepad1.a && stage > 0) {
                     stage--;
                 }
-
                 // Checks if the user has pressed gamepad button and goes up a stage
                 if (gamepad1.x && stage < 3) {
-
                     //Add increase the stage
                     stage++;
                 }
-
-
                 if (stage == 0){
                     robot.armMotor.setTargetPosition(stage0);
                     robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 }
-
                 //Checks for each stage and sets the robots height to that stage
                 if (stage == 1) {
                     robot.ArmToPosition(robot.TURN_SPEED, stage1Length);
                 }
-
                 else if (stage == 2) {
                     robot.ArmToPosition(robot.TURN_SPEED, stage2Length);
                 }
-
                 else if (stage == 3) {
                     robot.ArmToPosition(robot.TURN_SPEED, stage3Legnth);
                 }
-
             }*/
 
 
@@ -140,6 +134,7 @@ public class XDrive extends LinearOpMode {
 
                 else if (gamepad2.y) {
                     robot.ArmToPosition(robot.TURN_SPEED, stage3Height);
+                    robot.LiftUp();
                     stage = 3;
                 }
 
@@ -147,37 +142,35 @@ public class XDrive extends LinearOpMode {
 
             //Manual system if the user for whatever reason needs to move the linear slide down
             if (gamepad2.dpad_down){
-                robot.armMotor.setPower(-0.35);
+                robot.armMotor.setPower(-0.6);
+                robot.LiftDown();
+            }
+
+            else if (gamepad2.dpad_up){
+                robot.armMotor.setPower(0.6);
+                robot.LiftUp();
             }
 
             else{
                 robot.armMotor.setPower(0);
             }
 
-            if (gamepad2.dpad_up){
-                robot.armMotor.setPower(0.35);
+
+            //if (!robot.liftMotor.isBusy()){
+            //Motor for the armLift
+            //Note: we use an motor on our arm lift instead of an servo due to issues with torque
+            //We check the encoder ticks to see how far we need to move
+            if (gamepad2.right_bumper){
+                robot.LiftDown();
             }
 
-            else{
-                robot.armMotor.setPower(0);
+            else if (gamepad2.left_bumper){
+                robot.LiftUp();
             }
 
+            //}
 
-            if (!robot.liftMotor.isBusy()){
-                //Motor for the armLift
-                //Note: we use an motor on our arm lift instead of an servo due to issues with torque
-                //We check the encoder ticks to see how far we need to move
-                if (gamepad2.right_bumper){
-                    robot.LiftToPosition(robot.LIFT_TURN_SPEED, 9);
-                }
-
-                else if (gamepad2.left_bumper){
-                    robot.LiftToPosition(robot.LIFT_TURN_SPEED, -9);
-                }
-
-            }
-
-
+            //To Open and close the claw on when picking up a cone
             if (gamepad2.dpad_right){
                 robot.OpenClaw();
             }
@@ -189,6 +182,7 @@ public class XDrive extends LinearOpMode {
 
             telemetry.addData("Stage", "%7d", stage);
             telemetry.addData("Claw Opened:", "%b", robot.clawOpened);
+            telemetry.addData("Lift At:", "%7d", robot.liftMotor.getCurrentPosition());
             telemetry.update();
 
         }
